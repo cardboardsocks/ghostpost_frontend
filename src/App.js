@@ -9,28 +9,30 @@ class App extends Component {
       roast_boast: [],
 
     };
-    this.handleSubmit = this.handleSubmit.bind(this)
   };
 
   componentDidMount() {
     fetch("http://localhost:8000/api/roast_boast")
       .then((res) => res.json())
-      .then((data) => this.setState({post: data}));
+      .then((data) => this.setState({roast_boast: data}));
   }
 
-  handleSubmit = (e) => {
-    e.preventDefault();
-    let data = {
-      is_boast: document.getElementById("is_boast"),
-      content: document.getElementById("content").value
-    }
+  handleSubmit = (event) => {
+    event.preventDefault();
+    fetch('http://localhost:8000/api/roast_boast/', {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(this.state)
+    })
+        .then(res => res.json())
+        .then(res => console.log(res))
 
-    fetch("http://localhost:8000/api/roast_boast/", {
-      method: "POST",
-      headers: {"content": "application/json"},
-      body: JSON.stringify(data),
-    });
-  }
+
+    this.setState({ content: '', is_boast: true })
+}
 
 
 
@@ -43,7 +45,7 @@ class App extends Component {
   handleDownvote = (id) => {
     fetch("http://localhost:8000/api/roast_boast/" + id + "/add_downvote/")
     .then((res) => res.json())
-    .then((data) => this.forceUpdate(this.componentDidMount));
+    .then((data) => this.setState({downvote: data}));
   }
 
   handleBoasts = (event) => {
@@ -71,8 +73,6 @@ class App extends Component {
         <button onClick={this.handleBoasts}>Boasts</button> 
         <button onClick={this.handleRoasts}>Roasts</button>
         <button onClick={this.handleSortVotes}>Most Popular</button>
-
-
         <form onSubmit={this.handleSubmit}>
           <h3>Enter Text Here 
           <input
@@ -80,10 +80,10 @@ class App extends Component {
             name="input"
             type="text"
           /></h3>
-          <h3>Check for Boast, Leave blank for Roast
+          <h3>Click for Boast, Leave blank for Roast
           <input
             id="is_boast"
-            value="is_boast"
+            value="true"
             type="checkbox"
           /></h3>
           <button>Create Post</button>
@@ -91,24 +91,24 @@ class App extends Component {
         {this.state.roast_boast.map((p) => (
           <div>
           <h1>{p.is_boast ? 'Boast' : 'Roast'}</h1>
-          <h2>
+          <h4>
             ID: {p.id}
-          </h2>
-          <h2>
+          </h4>
+          <h4>
             Time Posted: {p.post_date}
-          </h2>
-          <h2>
+          </h4>
+          <h4>
             Content: {p.content}
-          </h2>
-          <h2>
-            Total Votes: {p.total}
+          </h4>
+          <h4>
+            Total Votes: {p.votes}
             <button onClick={e => this.handleUpvote(p.id)}>
               Upvote
             </button>
             <button onClick={e => this.handleDownvote(p.id)}>
               Downvote
             </button>
-          </h2>
+          </h4>
           </div>
         ))}
 
