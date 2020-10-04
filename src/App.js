@@ -1,60 +1,64 @@
-import React from 'react';
+import React, { Component } from 'react';
 import './App.css';
 
-class App extends React.Component {
+class App extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
-      is_boast: [],
+      roast_boast: [],
+
     };
     this.handleSubmit = this.handleSubmit.bind(this)
-  }
+  };
 
   componentDidMount() {
-    fetch('http://localhost:8000/api/roast_boast/')
+    fetch("http://localhost:8000/api/roast_boast")
       .then((res) => res.json())
-      .then((data) => this.setState({ is_boast: data.results }));
+      .then((data) => this.setState({post: data}));
   }
 
   handleSubmit = (e) => {
     e.preventDefault();
     let data = {
-      is_boast: document.getElementById("is_boast").checked,
-      user_input: document.getElementById("content").value
+      is_boast: document.getElementById("is_boast"),
+      content: document.getElementById("content").value
     }
 
     fetch("http://localhost:8000/api/roast_boast/", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: {"content": "application/json"},
       body: JSON.stringify(data),
     });
   }
 
+
+
   handleUpvote = (id) => {
-    fetch("http://localhost:8000/api/roast_boast/" + id + "/upvote/")
+    fetch("http://localhost:8000/api/roast_boast/" + id + "/add_upvote/")
     .then((res) => res.json())
     .then((data) => this.forceUpdate(this.componentDidMount));
   }
 
   handleDownvote = (id) => {
-    fetch("http://localhost:8000/api/roast_boast/" + id + "/downvote/")
+    fetch("http://localhost:8000/api/roast_boast/" + id + "/add_downvote/")
     .then((res) => res.json())
     .then((data) => this.forceUpdate(this.componentDidMount));
   }
 
-  handleBoasts = (e) => {
+  handleBoasts = (event) => {
     fetch("http://localhost:8000/api/roast_boast/boasts/")
     .then((res) => res.json())
     .then((data) => this.setState({roast_boast: data}));
   }
 
-  handleRoasts = (e) => {
+  handleRoasts = (event) => {
     fetch("http://localhost:8000/api/roast_boast/roasts/")
     .then((res) => res.json())
     .then((data) => this.setState({roast_boast: data}));
   }
 
-  handleSortVotes = (e) => {
+  handleSortVotes = (event) => {
     fetch("http://localhost:8000/api/roast_boast/most_popular/")
     .then((res) => res.json())
     .then((data) => this.setState({roast_boast: data}));
@@ -66,35 +70,35 @@ class App extends React.Component {
         <h1 >Ghostpost</h1>
         <button onClick={this.handleBoasts}>Boasts</button> 
         <button onClick={this.handleRoasts}>Roasts</button>
-        <button onClick={this.total_votes}>Most Popular</button>
+        <button onClick={this.handleSortVotes}>Most Popular</button>
+
 
         <form onSubmit={this.handleSubmit}>
-          <h3>What do you want to say? 
+          <h3>Enter Text Here 
           <input
-            id="is_boast"
+            id="content"
             name="input"
             type="text"
           /></h3>
-          <h4>Check for boast, leave blank for roast.
+          <h3>Check for Boast, Leave blank for Roast
           <input
             id="is_boast"
-            value="Post"
+            value="is_boast"
             type="checkbox"
-          /></h4>
+          /></h3>
           <button>Create Post</button>
         </form>
-        {this.state.roast_boast.map((p, id) => (
-          <div key ={id}>
+        {this.state.roast_boast.map((p) => (
+          <div>
           <h1>{p.is_boast ? 'Boast' : 'Roast'}</h1>
           <h2>
-            Created: {p.post_date}
+            ID: {p.id}
+          </h2>
+          <h2>
+            Time Posted: {p.post_date}
           </h2>
           <h2>
             Content: {p.content}
-          </h2>
-          <h2>
-            Upvotes: {p.upvotes}
-            Downvotes:{p.downvotes}
           </h2>
           <h2>
             Total Votes: {p.total}
@@ -107,6 +111,7 @@ class App extends React.Component {
           </h2>
           </div>
         ))}
+
       </div>
     );
   };
